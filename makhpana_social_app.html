@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ps" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مخپانہ - Makhpana Social App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts for Pashto / Urdu legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Embedded Web App Manifest for PWA Support -->
+    <link rel="manifest" id="manifest-placeholder">
+
+    <style>
+        body {
+            font-family: 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-200">
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    م
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-brand-600 dark:text-brand-500 leading-none">مخپانہ</h1>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Makhpana Social</span>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button id="themeToggle" class="p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors" title="تم در بدل کړئ / تھیم تبدیل کریں">
+                    <i class="fas fa-moon dark:hidden text-lg"></i>
+                    <i class="fas fa-sun hidden dark:inline text-lg text-yellow-400"></i>
+                </button>
+                
+                <button id="pwaInstallBtn" class="hidden items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow">
+                    <i class="fas fa-download"></i>
+                    <span>انسټال کړئ / انسٹال</span>
+                </button>
+
+                <button id="openProfileBtn" class="flex items-center gap-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition">
+                    <img id="navAvatar" src="https://placehold.co/100x100/16a34a/ffffff?text=User" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+                    <span id="navUsername" class="text-sm font-medium px-1 hidden sm:inline">کارونکی</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- Create Post Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 transition-all">
+            <div class="flex gap-3">
+                <img id="postInputAvatar" src="https://placehold.co/100x100/16a34a/ffffff?text=User" alt="Avatar" class="w-10 h-10 rounded-full object-cover shrink-0">
+                <div class="w-full">
+                    <textarea id="postText" rows="3" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none dark:text-gray-100" placeholder="په ذهنو کې څه لری؟ / آپ کے ذہن میں کیا ہے؟ (پښتو / اردو / English)"></textarea>
+                    
+                    <!-- Optional Image Link Container -->
+                    <div id="imageInputContainer" class="hidden mt-2">
+                        <input type="url" id="postImageUrl" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="عکس لنک / Image URL...">
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div id="imagePreviewContainer" class="hidden relative mt-2 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-48">
+                        <img id="imagePreview" src="" alt="Preview" class="w-full object-cover">
+                        <button id="removeImageBtn" class="absolute top-2 left-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-black">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Card Actions -->
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center gap-2">
+                            <button id="toggleImageInput" class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition">
+                                <i class="fas fa-image text-brand-500 text-sm"></i>
+                                <span>عکس اضافه کړئ / تصویر</span>
+                            </button>
+                        </div>
+                        <button id="submitPostBtn" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2 rounded-xl text-sm font-semibold transition-colors shadow-md flex items-center gap-1.5">
+                            <i class="fas fa-paper-plane text-xs"></i>
+                            <span>خپرول / پوسٹ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feed Post Stream -->
+        <div id="postsContainer" class="space-y-5">
+            <!-- Dynamic Posts rendered via JS -->
+        </div>
+
+    </main>
+
+    <!-- Profile Edit Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-200 dark:border-gray-700 space-y-4 transform scale-95 transition-transform duration-200" id="profileModalCard">
+            <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-3">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">پروفایل تدوین کړئ / پروائل ایڈٹ کریں</h3>
+                <button id="closeProfileBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <form id="profileForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">نوم / نام</label>
+                    <input type="text" id="profileNameInput" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">بیوګرافي / بائیو (Bio)</label>
+                    <textarea id="profileBioInput" rows="2" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">اواتار عکس لنک / Avatar Image URL</label>
+                    <input type="url" id="profileAvatarInput" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+
+                <div class="pt-2 flex gap-3 justify-end">
+                    <button type="button" id="cancelProfileBtn" class="px-4 py-2 rounded-xl text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">کینسل</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-medium bg-brand-600 text-white hover:bg-brand-700 shadow">ساتل / محفوظ کریں</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Generate Manifest dynamically
+        const manifestData = {
+            "name": "مخپانہ Social App",
+            "short_name": "مخپانہ",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#111827",
+            "theme_color": "#16a34a",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/16a34a/ffffff?text=مخپانہ",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/16a34a/ffffff?text=مخپانہ",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+        const stringManifest = JSON.stringify(manifestData);
+        const blobManifest = new Blob([stringManifest], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blobManifest);
+        document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+
+        // Service Worker inline registration
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'makhpana-cache-v1';
+                self.addEventListener('install', e => {
+                    e.waitUntil(
+                        caches.open(CACHE_NAME).then(cache => cache.addAll(['./']))
+                    );
+                });
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        caches.match(e.request).then(response => response || fetch(e.request))
+                    );
+                });
+            `;
+            const blobSW = new Blob([swCode], {type: 'application/javascript'});
+            const swURL = URL.createObjectURL(blobSW);
+            navigator.serviceWorker.register(swURL).catch(err => console.log('SW register handled:', err));
+        }
+
+        // Default initial data structures
+        const DEFAULT_USER = {
+            name: 'احمد افغان',
+            bio: 'مخپانہ خپرندویه ټولنه | به ښه راغلاست',
+            avatar: 'https://placehold.co/100x100/16a34a/ffffff?text=Ahmad'
+        };
+
+        const INITIAL_POSTS = [
+            {
+                id: 'post-1',
+                userName: 'احمد افغان',
+                userAvatar: 'https://placehold.co/100x100/16a34a/ffffff?text=Ahmad',
+                timestamp: Date.now() - 3600000,
+                text: 'سلامونه او نېکې هیلې! مخپانہ سوشل ایپلیکیشن ته ټول ملګري ښه راغلاست وایو. دلته خپل نظرونه او لیکنې شریکې کړئ.',
+                image: 'https://placehold.co/600x350/15803d/ffffff?text=سلامونه+پښتو',
+                likes: 5,
+                likedByMe: false,
+                comments: [
+                    { id: 'c1', name: 'خان برادر', text: 'ډیره مننه زما ملګری!', time: Date.now() - 1800000 }
+                ]
+            },
+            {
+                id: 'post-2',
+                userName: 'سارا خان',
+                userAvatar: 'https://placehold.co/100x100/2563eb/ffffff?text=Sara',
+                timestamp: Date.now() - 7200000,
+                text: 'مخپانہ ایپ میں اپ سب کو خوش آمدید! یہ ایپ اب مکمل طور پر فعال اور تیز رفتار ہے۔',
+                image: null,
+                likes: 3,
+                likedByMe: true,
+                comments: []
+            }
+        ];
+
+        // Application State
+        let currentUser = JSON.parse(localStorage.getItem('makhpana_user')) || DEFAULT_USER;
+        let posts = JSON.parse(localStorage.getItem('makhpana_posts')) || INITIAL_POSTS;
+
+        // Save State helper
+        function saveData() {
+            localStorage.setItem('makhpana_user', JSON.stringify(currentUser));
+            localStorage.setItem('makhpana_posts', JSON.stringify(posts));
+        }
+
+        function formatTimeAgo(timestamp) {
+            const diff = Math.floor((Date.now() - timestamp) / 1000);
+            if (diff < 60) return 'همدا اوس / ابھی';
+            if (diff < 3600) return `${Math.floor(diff / 60)} دقیقې وړاندې`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} ساعته وړاندې`;
+            return new Date(timestamp).toLocaleDateString();
+        }
+
+        function updateProfileUI() {
+            document.getElementById('navAvatar').src = currentUser.avatar;
+            document.getElementById('navUsername').textContent = currentUser.name;
+            document.getElementById('postInputAvatar').src = currentUser.avatar;
+            
+            // Sync form inputs
+            document.getElementById('profileNameInput').value = currentUser.name;
+            document.getElementById('profileBioInput').value = currentUser.bio;
+            document.getElementById('profileAvatarInput').value = currentUser.avatar;
+        }
+
+        function renderPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+
+            if (posts.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+                        <i class="fas fa-comment-slash text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500">هیڅ پوسټ ندی موندل شوی. لومړی پوسټ وکړئ!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            posts.forEach(post => {
+                const postEl = document.createElement('article');
+                postEl.className = 'bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3 transition-all';
+                
+                postEl.innerHTML = `
+                    <!-- Post Header -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <img src="${post.userAvatar}" alt="${post.userName}" class="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-gray-700" onerror="this.src='https://placehold.co/100x100/16a34a/ffffff?text=User'">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-gray-100">${escapeHTML(post.userName)}</h4>
+                                <span class="text-xs text-gray-400">${formatTimeAgo(post.timestamp)}</span>
+                            </div>
+                        </div>
+                        <button onclick="deletePost('${post.id}')" class="text-gray-400 hover:text-red-500 p-1 text-xs transition" title="پاکول / حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <!-- Post Body -->
+                    <p class="text-sm leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-line">${escapeHTML(post.text)}</p>
+
+                    <!-- Optional Image -->
+                    ${post.image ? `
+                        <div class="rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 max-h-96 bg-black/5">
+                            <img src="${post.image}" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'">
+                        </div>
+                    ` : ''}
+
+                    <!-- Post Actions Bar -->
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+                        <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 py-1 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition ${post.likedByMe ? 'text-red-500 font-semibold' : ''}">
+                            <i class="${post.likedByMe ? 'fas' : 'far'} fa-heart text-sm"></i>
+                            <span>${post.likes} دښمن/خوښول</span>
+                        </button>
+                        
+                        <button onclick="toggleComments('${post.id}')" class="flex items-center gap-1.5 py-1 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                            <i class="far fa-comment text-sm"></i>
+                            <span>${post.comments.length} تبصرې / کمنټس</span>
+                        </button>
+                    </div>
+
+                    <!-- Expandable Comments Section -->
+                    <div id="comments-${post.id}" class="hidden pt-2 border-t border-gray-100 dark:border-gray-700/60 space-y-3">
+                        <div class="space-y-2 max-h-48 overflow-y-auto pl-1 pr-1" id="commentList-${post.id}">
+                            ${post.comments.map(c => `
+                                <div class="bg-gray-50 dark:bg-gray-900/60 p-2.5 rounded-xl text-xs space-y-1">
+                                    <div class="flex justify-between font-semibold text-gray-700 dark:text-gray-300">
+                                        <span>${escapeHTML(c.name)}</span>
+                                        <span class="text-[10px] text-gray-400 font-normal">${formatTimeAgo(c.time)}</span>
+                                    </div>
+                                    <p class="text-gray-600 dark:text-gray-300">${escapeHTML(c.text)}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Add Comment Input -->
+                        <div class="flex gap-2 pt-1">
+                            <input type="text" id="commentInput-${post.id}" class="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-brand-500 outline-none" placeholder="نظر ولیکئ / کمنٹ لکھیے...">
+                            <button onclick="addComment('${post.id}')" class="bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow">لېږل</button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(postEl);
+            });
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        // Like Post
+        window.toggleLike = function(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likedByMe = !post.likedByMe;
+                post.likes += post.likedByMe ? 1 : -1;
+                saveData();
+                renderPosts();
+            }
+        };
+
+        // Delete Post
+        window.deletePost = function(postId) {
+            posts = posts.filter(p => p.id !== postId);
+            saveData();
+            renderPosts();
+        };
+
+        // Toggle Comment Tray Visibility
+        window.toggleComments = function(postId) {
+            const commentTray = document.getElementById(`comments-${postId}`);
+            if (commentTray) {
+                commentTray.classList.toggle('hidden');
+            }
+        };
+
+        // Add Comment Logic
+        window.addComment = function(postId) {
+            const input = document.getElementById(`commentInput-${postId}`);
+            const text = input.value.trim();
+            if (!text) return;
+
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.comments.push({
+                    id: 'c_' + Date.now(),
+                    name: currentUser.name,
+                    text: text,
+                    time: Date.now()
+                });
+                input.value = '';
+                saveData();
+                renderPosts();
+                // Ensure Tray remains expanded
+                document.getElementById(`comments-${postId}`).classList.remove('hidden');
+            }
+        };
+
+        // Image URL Preview Controls
+        const toggleImageBtn = document.getElementById('toggleImageInput');
+        const imageInputContainer = document.getElementById('imageInputContainer');
+        const postImageUrl = document.getElementById('postImageUrl');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+
+        toggleImageBtn.addEventListener('click', () => {
+            imageInputContainer.classList.toggle('hidden');
+        });
+
+        postImageUrl.addEventListener('input', (e) => {
+            const url = e.target.value.trim();
+            if (url) {
+                imagePreview.src = url;
+                imagePreviewContainer.classList.remove('hidden');
+            } else {
+                imagePreviewContainer.classList.add('hidden');
+            }
+        });
+
+        removeImageBtn.addEventListener('click', () => {
+            postImageUrl.value = '';
+            imagePreviewContainer.classList.add('hidden');
+            imageInputContainer.classList.add('hidden');
+        });
+
+        // Submit Post Button
+        document.getElementById('submitPostBtn').addEventListener('click', () => {
+            const textInput = document.getElementById('postText');
+            const text = textInput.value.trim();
+            const imageUrl = postImageUrl.value.trim();
+
+            if (!text && !imageUrl) return;
+
+            const newPost = {
+                id: 'post-' + Date.now(),
+                userName: currentUser.name,
+                userAvatar: currentUser.avatar,
+                timestamp: Date.now(),
+                text: text,
+                image: imageUrl || null,
+                likes: 0,
+                likedByMe: false,
+                comments: []
+            };
+
+            posts.unshift(newPost);
+            saveData();
+            renderPosts();
+
+            // Reset Input Form
+            textInput.value = '';
+            postImageUrl.value = '';
+            imagePreviewContainer.classList.add('hidden');
+            imageInputContainer.classList.add('hidden');
+        });
+
+        // Profile Modal Logic
+        const profileModal = document.getElementById('profileModal');
+        const openProfileBtn = document.getElementById('openProfileBtn');
+        const closeProfileBtn = document.getElementById('closeProfileBtn');
+        const cancelProfileBtn = document.getElementById('cancelProfileBtn');
+        const profileForm = document.getElementById('profileForm');
+
+        function openModal() {
+            updateProfileUI();
+            profileModal.classList.remove('hidden');
+            setTimeout(() => {
+                profileModal.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function closeModal() {
+            profileModal.classList.add('opacity-0');
+            setTimeout(() => {
+                profileModal.classList.add('hidden');
+            }, 200);
+        }
+
+        openProfileBtn.addEventListener('click', openModal);
+        closeProfileBtn.addEventListener('click', closeModal);
+        cancelProfileBtn.addEventListener('click', closeModal);
+
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            currentUser.name = document.getElementById('profileNameInput').value.trim() || currentUser.name;
+            currentUser.bio = document.getElementById('profileBioInput').value.trim();
+            currentUser.avatar = document.getElementById('profileAvatarInput').value.trim() || currentUser.avatar;
+
+            saveData();
+            updateProfileUI();
+            renderPosts();
+            closeModal();
+        });
+
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('makhpana_theme', isDark ? 'dark' : 'light');
+        });
+
+        // Load Theme preference
+        if (localStorage.getItem('makhpana_theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // PWA Install Prompt Capture
+        let deferredPrompt;
+        const pwaBtn = document.getElementById('pwaInstallBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBtn.classList.remove('hidden');
+            pwaBtn.classList.add('flex');
+        });
+
+        pwaBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    pwaBtn.classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateProfileUI();
+            renderPosts();
+        });
+    </script>
+</body>
+</html>
